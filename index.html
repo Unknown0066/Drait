@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>AIT Student Portal</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-tr from-gray-100 via-blue-100 to-white min-h-screen p-6">
+  <!-- Logo and Header -->
+  <div class="text-center mb-6">
+    <img src="logo.png" alt="AIT Logo" class="mx-auto w-24 h-24 mb-2 rounded-full shadow-md" />
+    <h1 class="text-3xl font-bold text-blue-900">Dr. AMBEDKAR INSTITUTE OF TECHNOLOGY</h1>
+    <p class="text-sm text-gray-600">Outer Ring Road, Malathahalli, Bengaluru-560056, Karnataka, India</p>
+  </div>
+
+  <!-- Input Section -->
+  <div class="max-w-md mx-auto bg-white border border-blue-200 shadow-lg rounded-xl p-6">
+    <h2 class="text-xl font-semibold text-center mb-4 text-blue-700">Student Marks & Attendance Portal</h2>
+    <input
+      id="usnInput"
+      type="text"
+      placeholder="Enter your USN (e.g., 1DA24EI006)"
+      class="w-full border border-gray-300 rounded-lg p-3 mb-4 focus:outline-none focus:ring-2 focus:ring-blue-400"
+    />
+    <button
+      onclick="fetchDetails()"
+      class="w-full bg-blue-700 text-white py-2 rounded-lg hover:bg-blue-800 transition">
+      View Result
+    </button>
+  </div>
+
+  <!-- Display Section -->
+  <div id="result" class="hidden max-w-5xl mx-auto mt-8 space-y-6">
+    <!-- Student Info -->
+    <div class="bg-white shadow-md rounded-lg p-5 border-l-4 border-blue-500">
+      <h3 class="text-xl font-bold text-blue-700 mb-2">Student Information</h3>
+      <p><strong>Name:</strong> <span id="name"></span></p>
+      <p><strong>USN:</strong> <span id="usn"></span></p>
+      <p><strong>Branch:</strong> <span id="branch"></span></p>
+      <p><strong>Semester:</strong> <span id="semester"></span></p>
+    </div>
+
+    <!-- Marks and Attendance Section -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div class="bg-white shadow rounded-lg p-5">
+        <h3 class="text-xl font-bold text-blue-700 text-center mb-4">Marks (CIE & SEE)</h3>
+        <div id="marksContainer" class="space-y-3"></div>
+      </div>
+      <div class="bg-white shadow rounded-lg p-5">
+        <h3 class="text-xl font-bold text-blue-700 text-center mb-4">Attendance</h3>
+        <div id="attendanceContainer" class="space-y-3"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Official Info Link -->
+  <div class="text-center mt-10">
+    <a href="https://drait.edu.in" target="_blank"
+       class="bg-blue-600 text-white px-5 py-2 rounded-full text-sm font-semibold hover:bg-blue-700 shadow-md">
+      Visit Official DRAIT Website
+    </a>
+    <div class="mt-4 text-sm text-gray-700">
+      For any information, visit the official site:
+      <a href="https://drait.edu.in" target="_blank" class="text-blue-700 underline hover:text-blue-900">
+        https://drait.edu.in
+      </a>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="mt-12 border-t pt-6 text-center text-sm text-gray-600">
+    <p class="mb-1">
+      © 2025 Dr. Ambedkar Institute of Technology. All rights reserved.
+    </p>
+    <p class="mb-1">
+      Contact us:
+      <a href="mailto:info@drait.edu.in" class="text-blue-700 underline hover:text-blue-900">info@drait.edu.in</a>
+    </p>
+    <p>
+      Website:
+      <a href="https://drait.edu.in" target="_blank" class="text-blue-700 underline hover:text-blue-900">https://drait.edu.in</a>
+    </p>
+  </footer>
+
+  <!-- JS for Data -->
+  <script>
+    const studentData = {
+      "1DA24EI006": {
+        name: "Gagan D M",
+        branch: "Electronics and Instrumentation",
+        semester: "2nd",
+        subjects: [
+          { subject: "Maths", cie1: 18, cie2: 20, see: 72, attendance: "88%" },
+          { subject: "IDT", cie1: 17, cie2: 19, see: 76, attendance: "85%" },
+          { subject: "CDN", cie1: 20, cie2: 21, see: 80, attendance: "84%" },
+          { subject: "Kannada", cie1: 16, cie2: 18, see: 65, attendance: "83%" },
+          { subject: "English", cie1: 19, cie2: 20, see: 74, attendance: "87%" },
+          { subject: "ECT", cie1: 21, cie2: 22, see: 78, attendance: "89%" },
+          { subject: "ETT", cie1: 22, cie2: 23, see: 81, attendance: "86%" }
+        ]
+      },
+      "1DA24EI007": {
+        name: "Anusha B",
+        branch: "Electronics and Instrumentation",
+        semester: "2nd",
+        subjects: [
+          { subject: "Maths", cie1: 19, cie2: 21, see: 75, attendance: "89%" },
+          { subject: "IDT", cie1: 18, cie2: 20, see: 72, attendance: "88%" },
+          { subject: "CDN", cie1: 17, cie2: 22, see: 78, attendance: "86%" },
+          { subject: "Kannada", cie1: 15, cie2: 17, see: 69, attendance: "84%" },
+          { subject: "English", cie1: 20, cie2: 21, see: 82, attendance: "87%" },
+          { subject: "ECT", cie1: 19, cie2: 20, see: 77, attendance: "85%" },
+          { subject: "ETT", cie1: 21, cie2: 22, see: 80, attendance: "88%" }
+        ]
+      }
+    };
+
+    function fetchDetails() {
+      const usnInput = document.getElementById("usnInput").value.trim().toUpperCase();
+      const resultDiv = document.getElementById("result");
+      const nameSpan = document.getElementById("name");
+      const usnSpan = document.getElementById("usn");
+      const branchSpan = document.getElementById("branch");
+      const semSpan = document.getElementById("semester");
+      const marksDiv = document.getElementById("marksContainer");
+      const attDiv = document.getElementById("attendanceContainer");
+
+      if (!usnInput.startsWith("1DA")) {
+        alert("Invalid USN. It should start with 1DA.");
+        return;
+      }
+
+      const student = studentData[usnInput];
+      if (student) {
+        resultDiv.classList.remove("hidden");
+        nameSpan.textContent = student.name;
+        usnSpan.textContent = usnInput;
+        branchSpan.textContent = student.branch;
+        semSpan.textContent = student.semester;
+
+        marksDiv.innerHTML = "";
+        attDiv.innerHTML = "";
+
+        student.subjects.forEach(sub => {
+          marksDiv.innerHTML += `
+            <div class="p-3 bg-blue-50 rounded-lg border border-blue-200">
+              <h4 class="font-semibold text-blue-900">${sub.subject}</h4>
+              <p>CIE 1: <strong>${sub.cie1}</strong></p>
+              <p>CIE 2: <strong>${sub.cie2}</strong></p>
+              <p>SEE: <strong>${sub.see}</strong> / 100</p>
+            </div>`;
+          attDiv.innerHTML += `
+            <div class="p-3 bg-gray-50 rounded-lg border border-gray-300">
+              <h4 class="font-semibold text-blue-900">${sub.subject}</h4>
+              <p>Attendance: <strong>${sub.attendance}</strong></p>
+            </div>`;
+        });
+      } else {
+        alert("No record found for USN: " + usnInput);
+        resultDiv.classList.add("hidden");
+      }
+    }
+  </script>
+</body>
+</html><!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>AIT Student Portal</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-tr from-gray-100 via-blue-100 to-white min-h-screen p-6">
+  <!-- Logo and Header -->
+  <div class="text-center mb-6">
+    <img src="logo.png" alt="AIT Logo" class="mx-auto w-24 h-24 mb-2 rounded-full shadow-md" />
+    <h1 class="text-3xl font-bold text-blue-900">Dr. AMBEDKAR INSTITUTE OF TECHNOLOGY</h1>
+    <p class="text-sm text-gray-600">Outer Ring Road, Malathahalli, Bengaluru-560056, Karnataka, India</p>
+  </div>
+
+  <!-- Input Section -->
+  <div class="max-w-md mx-auto bg-white border border-blue-200 shadow-lg rounded-xl p-6">
+    <h2 class="text-xl font-semibold text-center mb-4 text-blue-700">Student Marks & Attendance Portal</h2>
+    <input
+      id="usnInput"
+      type="text"
+      placeholder="Enter your USN (e.g., 1DA24EI006)"
+      class="w-full border border-gray-300 rounded-lg p-3 mb-4 focus:outline-none focus:ring-2 focus:ring-blue-400"
+    />
+    <button
+      onclick="fetchDetails()"
+      class="w-full bg-blue-700 text-white py-2 rounded-lg hover:bg-blue-800 transition">
+      View Result
+    </button>
+  </div>
+
+  <!-- Display Section -->
+  <div id="result" class="hidden max-w-5xl mx-auto mt-8 space-y-6">
+    <!-- Student Info -->
+    <div class="bg-white shadow-md rounded-lg p-5 border-l-4 border-blue-500">
+      <h3 class="text-xl font-bold text-blue-700 mb-2">Student Information</h3>
+      <p><strong>Name:</strong> <span id="name"></span></p>
+      <p><strong>USN:</strong> <span id="usn"></span></p>
+      <p><strong>Branch:</strong> <span id="branch"></span></p>
+      <p><strong>Semester:</strong> <span id="semester"></span></p>
+    </div>
+
+    <!-- Marks and Attendance Section -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div class="bg-white shadow rounded-lg p-5">
+        <h3 class="text-xl font-bold text-blue-700 text-center mb-4">Marks (CIE & SEE)</h3>
+        <div id="marksContainer" class="space-y-3"></div>
+      </div>
+      <div class="bg-white shadow rounded-lg p-5">
+        <h3 class="text-xl font-bold text-blue-700 text-center mb-4">Attendance</h3>
+        <div id="attendanceContainer" class="space-y-3"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Official Info Link -->
+  <div class="text-center mt-10">
+    <a href="https://drait.edu.in" target="_blank"
+       class="bg-blue-600 text-white px-5 py-2 rounded-full text-sm font-semibold hover:bg-blue-700 shadow-md">
+      Visit Official DRAIT Website
+    </a>
+    <div class="mt-4 text-sm text-gray-700">
+      For any information, visit the official site:
+      <a href="https://drait.edu.in" target="_blank" class="text-blue-700 underline hover:text-blue-900">
+        https://drait.edu.in
+      </a>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="mt-12 border-t pt-6 text-center text-sm text-gray-600">
+    <p class="mb-1">
+      © 2025 Dr. Ambedkar Institute of Technology. All rights reserved.
+    </p>
+    <p class="mb-1">
+      Contact us:
+      <a href="mailto:info@drait.edu.in" class="text-blue-700 underline hover:text-blue-900">info@drait.edu.in</a>
+    </p>
+    <p>
+      Website:
+      <a href="https://drait.edu.in" target="_blank" class="text-blue-700 underline hover:text-blue-900">https://drait.edu.in</a>
+    </p>
+  </footer>
+
+  <!-- JS for Data -->
+  <script>
+    const studentData = {
+      "1DA24EI006": {
+        name: "Gagan D M",
+        branch: "Electronics and Instrumentation",
+        semester: "2nd",
+        subjects: [
+          { subject: "Maths", cie1: 18, cie2: 20, see: 72, attendance: "88%" },
+          { subject: "IDT", cie1: 17, cie2: 19, see: 76, attendance: "85%" },
+          { subject: "CDN", cie1: 20, cie2: 21, see: 80, attendance: "84%" },
+          { subject: "Kannada", cie1: 16, cie2: 18, see: 65, attendance: "83%" },
+          { subject: "English", cie1: 19, cie2: 20, see: 74, attendance: "87%" },
+          { subject: "ECT", cie1: 21, cie2: 22, see: 78, attendance: "89%" },
+          { subject: "ETT", cie1: 22, cie2: 23, see: 81, attendance: "86%" }
+        ]
+      },
+      "1DA24EI007": {
+        name: "Anusha B",
+        branch: "Electronics and Instrumentation",
+        semester: "2nd",
+        subjects: [
+          { subject: "Maths", cie1: 19, cie2: 21, see: 75, attendance: "89%" },
+          { subject: "IDT", cie1: 18, cie2: 20, see: 72, attendance: "88%" },
+          { subject: "CDN", cie1: 17, cie2: 22, see: 78, attendance: "86%" },
+          { subject: "Kannada", cie1: 15, cie2: 17, see: 69, attendance: "84%" },
+          { subject: "English", cie1: 20, cie2: 21, see: 82, attendance: "87%" },
+          { subject: "ECT", cie1: 19, cie2: 20, see: 77, attendance: "85%" },
+          { subject: "ETT", cie1: 21, cie2: 22, see: 80, attendance: "88%" }
+        ]
+      }
+    };
+
+    function fetchDetails() {
+      const usnInput = document.getElementById("usnInput").value.trim().toUpperCase();
+      const resultDiv = document.getElementById("result");
+      const nameSpan = document.getElementById("name");
+      const usnSpan = document.getElementById("usn");
+      const branchSpan = document.getElementById("branch");
+      const semSpan = document.getElementById("semester");
+      const marksDiv = document.getElementById("marksContainer");
+      const attDiv = document.getElementById("attendanceContainer");
+
+      if (!usnInput.startsWith("1DA")) {
+        alert("Invalid USN. It should start with 1DA.");
+        return;
+      }
+
+      const student = studentData[usnInput];
+      if (student) {
+        resultDiv.classList.remove("hidden");
+        nameSpan.textContent = student.name;
+        usnSpan.textContent = usnInput;
+        branchSpan.textContent = student.branch;
+        semSpan.textContent = student.semester;
+
+        marksDiv.innerHTML = "";
+        attDiv.innerHTML = "";
+
+        student.subjects.forEach(sub => {
+          marksDiv.innerHTML += `
+            <div class="p-3 bg-blue-50 rounded-lg border border-blue-200">
+              <h4 class="font-semibold text-blue-900">${sub.subject}</h4>
+              <p>CIE 1: <strong>${sub.cie1}</strong></p>
+              <p>CIE 2: <strong>${sub.cie2}</strong></p>
+              <p>SEE: <strong>${sub.see}</strong> / 100</p>
+            </div>`;
+          attDiv.innerHTML += `
+            <div class="p-3 bg-gray-50 rounded-lg border border-gray-300">
+              <h4 class="font-semibold text-blue-900">${sub.subject}</h4>
+              <p>Attendance: <strong>${sub.attendance}</strong></p>
+            </div>`;
+        });
+      } else {
+        alert("No record found for USN: " + usnInput);
+        resultDiv.classList.add("hidden");
+      }
+    }
+  </script>
+</body>
+</html>
